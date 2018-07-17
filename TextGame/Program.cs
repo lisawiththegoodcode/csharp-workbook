@@ -11,8 +11,7 @@ namespace TextGame
             string ch1 = Console.ReadLine();
             //declare variables
             int stick = 0;
-            int complete = 0;
-
+            int complete = 0; 
             //STICK TAKEN
             if ((ch1 == "y") || (ch1 =="Y") || (ch1 =="Yes") || (ch1 =="YES") || (ch1 =="yes"))
             {
@@ -22,7 +21,7 @@ namespace TextGame
             }
             else 
             {
-                Console.WriteLine("You did not take the stick");
+                Console.WriteLine("You did not take the stick.");
                 stick = 0;
             }
                 
