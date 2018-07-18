@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace TextGame
 {
@@ -16,7 +17,7 @@ namespace TextGame
             if ((ch1 == "y") || (ch1 =="Y") || (ch1 =="Yes") || (ch1 =="YES") || (ch1 =="yes"))
             {
                 Console.WriteLine("You have taken the stick!");
-                //call delay
+                Thread.Sleep(2000);
                 stick = 1;
             }
             else 
@@ -32,9 +33,9 @@ namespace TextGame
             if ((ch2 == "y") || (ch2 =="Y") || (ch2 =="Yes") || (ch2 =="YES") || (ch2 =="yes"))
             {
             Console.WriteLine("You approach the object...");
-            //call delay
+            Thread.Sleep(2000);
             Console.WriteLine("As you draw closer, you begin to make out the object as an eye!");
-            //call delay
+            Thread.Sleep(1000);
             Console.WriteLine("The eye belongs to a giant spider! Do you try to fight it? [y/n]");
             string ch3 = Console.ReadLine();
                 
@@ -46,20 +47,20 @@ namespace TextGame
                     {
                         Console.WriteLine("You only have a stick to fight with!");
                         Console.WriteLine("You quickly jab the spider in it's eye and gain an advantage");
-                        //call delay
+                        Thread.Sleep(2000);
                         Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                         Console.WriteLine("                  Fighting...                   ");
                         Console.WriteLine("   YOU MUST HIT ABOVE A 5 TO KILL THE SPIDER    ");
                         Console.WriteLine("IF THE SPIDER HITS HIGHER THAN YOU, YOU WILL DIE");
                         Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                        //call delay
+                        Thread.Sleep(2000);
                          //declare variables to generate random numbers for spider fight
                         Random rnd = new Random();
                         int fdmg1 = Convert.ToInt32(rnd.Next(3, 10));
                         int edmg1 = Convert.ToInt32(rnd.Next(1, 5));
                         Console.WriteLine("You hit " + fdmg1);
                         Console.WriteLine("The spider hits " + edmg1);
-                        //call delay
+                        Thread.Sleep(2000);
 
                         //wrote seperate function, since the spider fight is a repeat action
                         SpiderFight(fdmg1, edmg1);
@@ -68,20 +69,20 @@ namespace TextGame
                     else 
                     {
                         Console.WriteLine("You don't have anything to fight with!");
-                        //call delay
+                        Thread.Sleep(2000);
                         Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                         Console.WriteLine("                  Fighting...                   ");
                         Console.WriteLine("   YOU MUST HIT ABOVE A 5 TO KILL THE SPIDER    ");
                         Console.WriteLine("IF THE SPIDER HITS HIGHER THAN YOU, YOU WILL DIE");
                         Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                        //call delay
+                        Thread.Sleep(2000);
                         //declare variables to generate random numbers for spider fight
                         Random rnd2 = new Random();
                         int fdmg2 = Convert.ToInt32(rnd2.Next(1, 8));
                         int edmg2 = Convert.ToInt32(rnd2.Next(1, 5));
                         Console.WriteLine("You hit " + fdmg2);
                         Console.WriteLine("The spider hits " + edmg2);
-                        //call delay
+                        Thread.Sleep(2000);
 
                         //wrote seperate function, since the spider fight is a repeat action
                         SpiderFight(fdmg2, edmg2);
@@ -92,7 +93,7 @@ namespace TextGame
                 else 
                 {
                     Console.WriteLine("You choose not to fight the spider.");
-                    //call delay
+                    Thread.Sleep(1000);
                     Console.WriteLine("As you turn away, it ambushes you and impales you with it's fangs!!!");
                     complete = 0;
                     GameLoop(complete);
@@ -102,9 +103,11 @@ namespace TextGame
             else
             {
                 Console.WriteLine("You turn away from the glowing object and attempt to leave the cave...");
-                //call delay
-                Console.WriteLine(@"But something won't let you.... IT'S A GIANT POISONOUS SPIDER!");
-                //cayll delay
+                Thread.Sleep(1000);
+                Console.WriteLine(@"But something won't let you.... IT'S A GIANT POISONOUS SPIDER! Heading your way fast!!");
+                Thread.Sleep(1000);
+                Console.WriteLine(@"You turn to run, but you're too late...");
+                Thread.Sleep(2000);
                 complete = 0;
                 GameLoop(complete);
             }
@@ -118,19 +121,22 @@ namespace TextGame
 
             if (spider > player)
             {
-               Console.WriteLine("The spider has dealt more damage than you!");
+                Console.WriteLine("The spider has dealt more damage than you!");
+                Thread.Sleep(2000);                
                 complete = 0;
                 GameLoop(complete);
             } 
             else if (player < 5)
             {
                 Console.WriteLine("You didn't do enough damage to kill the spider, but you managed to escape");
+                Thread.Sleep(2000);                
                 complete = 1;
                 GameLoop(complete);
             }
             else
             {
                 Console.WriteLine("You killed the spider!");
+                Thread.Sleep(2000);
                 complete = 1;
                 GameLoop(complete);
             }
@@ -180,7 +186,8 @@ namespace TextGame
             Console.WriteLine("Welcome to the cavern of secrets!");
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-            //call delay
+            Thread.Sleep(3000);
+
             GamePlay();            
         }
     }
