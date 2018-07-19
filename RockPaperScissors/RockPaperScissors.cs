@@ -4,19 +4,32 @@ namespace RockPaperScissors
 {
     class Program
     {
-        public static void Scoreboard(int winner, int yourScore, int computerScore)
+        public static void Scoreboard(int yourScore, int computerScore)
         {
+            yourScore += yourScore;
+            computerScore += computerScore; 
+            Console.WriteLine($"Current Score: Player 1-{yourScore} / Computer-{computerScore}");
+            GameLoop();
+
+        }
+
+        public static void Scorekeeper(int winner)
+        {
+            int score1 = 0;
+            int score2 = 0;
 
             if (winner == 1)
             {
-                yourScore++;
+                score1++;
+                Console.WriteLine("Score it now {0}", score1);
+
             }
             else if (winner == 2)
             {
-                computerScore++;
+                score2++;
+                Console.WriteLine("Score it now {0}", score2);
             }
-            Console.WriteLine($"Current Score: Player 1-{yourScore} / Computer-{computerScore}");
-
+            Scoreboard(score1, score2);
         }
         public static void GameLoop()
         {
@@ -31,8 +44,10 @@ namespace RockPaperScissors
                  Console.WriteLine("Thank you for playing!");
             }
         } 
-        public static void CompareHands(int winner, string hand1, string hand2)
+        public static void CheckForWins(string hand1, string hand2)
         {
+            int winner = 0;
+            //compare the two hands
             if ((hand1 == "rock" && hand2 == "scissors") || (hand1 == "paper" && hand2 == "rock") || (hand1 == "scissors" && hand2 == "paper"))
             {
                 winner = 1;
@@ -52,8 +67,7 @@ namespace RockPaperScissors
             {
                 Console.WriteLine("You did not enter a valid hand, please try again.");
             }
-            GameLoop();
-            // Scoreboard();
+            Scorekeeper(winner);
         }
         public static void GamePlay()
         {
@@ -78,12 +92,7 @@ namespace RockPaperScissors
                 hand2 = "scissors";
             }
             Console.WriteLine(hand2);
-
-            // string hand2 = Console.ReadLine().ToLower();
-
-            //compare the two hands
-            CompareHands(hand1, hand2);
-            // Console.WriteLine(CompareHands(hand1, hand2));
+            CheckForWins(hand1, hand2);
         }
         public static void Main()
         {
@@ -91,14 +100,12 @@ namespace RockPaperScissors
             //initalize scoreboard variables
             int yourScore = 0;
             int computerScore = 0;
-            int winner = 0;
 
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             Console.WriteLine("Welcome to Rock Paper Scissors!");
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             GamePlay();
-
-            Scoreboard(winner, yourScore, computerScore);
+            Scoreboard(yourScore, computerScore);
 
             // leave this command at the end so your program does not close automatically
             // Console.ReadLine();
