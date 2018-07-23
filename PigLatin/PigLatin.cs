@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PigLatin
 {
@@ -98,8 +99,8 @@ namespace PigLatin
             for (int i = 0; i < words.Length; i++)
             {
                 string readThis = words[i];
-                string keepThisStart = "";
-                string keepThisEnd = "";
+                List<string> keepThisStart = new List<string>();
+                List<string> keepThisEnd = new List<string>();
                 // Console.WriteLine("In for loop, here's my readThis:" + readThis);
                 
                 //iterate through characters of each word to search for punctuation
@@ -107,6 +108,7 @@ namespace PigLatin
                 char[] punctuation = {'.', ',', '\'', '\"', '?', '!'};
                 for (int y = 0; y < chars.Length; y++)
                 {
+                    Console.WriteLine(chars.Length);
                     //if there is punctuation, figure out where it appears in the string
                     if (Char.IsPunctuation(chars[y]))
                     {
@@ -116,7 +118,7 @@ namespace PigLatin
                         {
                             // Console.WriteLine("and it's at the beginning of a string");
                             readThis = readThis.TrimStart(punctuation);
-                            keepThisStart = (chars[y]).ToString();
+                            keepThisStart.Add((chars[y]).ToString());
                             // Console.WriteLine($"new word: {readThis}, punctuation: {keepThisStart}");
                         } 
 
@@ -125,13 +127,18 @@ namespace PigLatin
                         {
                             // Console.WriteLine("and it's at the end of the string");
                             readThis = readThis.TrimEnd(punctuation);
-                            keepThisEnd = (chars[y]).ToString();
+                            keepThisEnd.Add((chars[y]).ToString());
                             // Console.WriteLine($"new word: {readThis}, punctuation: {keepThisEnd}");
+                        }
 
+                        if (y == ((chars.Length) - 2))
+                        {
+                        readThis = readThis.TrimEnd(punctuation);
+                        keepThisEnd.Add((chars[y]).ToString());
                         }
 
                         //if it's in the middle I suppose we should just remove it? ex that's would be atsthay not at'sthay
-                        if (y != 0 && (y != (chars.Length - 1)))
+                        if (y != 0 && (y != (chars.Length - 1)) && (y != ((chars.Length) - 2)))
                         {
                             int position = y;
                             readThis = readThis.Remove(y,1);
@@ -140,11 +147,24 @@ namespace PigLatin
                         }
                     }
                     //if we have something to add to the start or end of this word, translate it first then add it back in
-                    if (keepThisStart != "" || keepThisEnd != "")
+                    if (keepThisStart.Count != 0 || keepThisEnd.Count != 0)
                     {
                         //prepend/append any punctuation that was on the front or back of the word
+                        string startingPuncs = "";
+                        string endingPuncs = "";
+
+                        for (int s=0; s<keepThisStart.Count; s++)
+                        {
+                            startingPuncs = startingPuncs + keepThisStart[s];
+                        }
+
+                        for (int e=0; e<keepThisEnd.Count; e++)
+                        {
+                            endingPuncs = endingPuncs + keepThisEnd[e];
+                        }
+
                         word = TranslatorPrep (readThis);
-                        word = keepThisStart + word + keepThisEnd;
+                        word = startingPuncs + word + endingPuncs;
                     }
                     //otherwise do go through the translation process for the word
                     else
