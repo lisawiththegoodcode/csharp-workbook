@@ -44,6 +44,7 @@ namespace TicTacToe
             //if there's a win or a tie, lets determine if they want to play again or if they want to quit
             if (CheckForWin() || CheckForTie())
             {
+                DrawBoard();
                 GameLoop();
             }
 
@@ -58,7 +59,9 @@ namespace TicTacToe
                     if (playerTurn == "X")
                     {
                         scoreX++;
+                        Print("");
                         Print($"Current Score: Player X-{scoreX}, Player O-{scoreO}");
+                        Print("");
                     }
                     else
                     {
