@@ -14,22 +14,49 @@ namespace ExceptionHandling
             Console.WriteLine("Welcome to Rock Paper Scissors!");
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-            String userHand = getUserInput();
-            String computerHand = generateAiInput();
-            Console.WriteLine($"Computer plays: {computerHand}");
-            int winner = CompareHands(userHand, computerHand);
-            if (winner ==1) 
+            do
             {
-                Console.WriteLine("You win!");
-                userScore++;
-            } else if (winner == 2)
-            {
-                Console.WriteLine("Computer wins!");
-                computerScore++;
-            }
+                bool run = true;
+                string userHand = "";
+                string computerHand = "";
+                while (run)
+                {
+                    try
+                    {
+                        userHand = getUserInput();
+                        run = false;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("That is not a valid entry. Please try again.");
+                        userHand = "";
+                        run = true;
+                    }
+                    finally
+                    {
+                        computerHand = generateAiInput(); 
+                    }
+                }
+                Console.WriteLine($"Computer plays: {computerHand}"); 
 
-            Console.WriteLine($"Current Score: Your Score - {userScore} / Computer Score - {computerScore}")
-            GameLoop();
+                int winner = CompareHands(userHand, computerHand);
+                if (winner ==1) 
+                {
+                    Console.WriteLine("You win!");
+                    userScore++;
+                } else if (winner == 2)
+                {
+                    Console.WriteLine("Computer wins!");
+                    computerScore++;
+                } else
+                {
+                    Console.WriteLine("It's a tie!");
+                }
+                Console.WriteLine($"Current Score: Your Score - {userScore} / Computer Score - {computerScore}");
+            } while (PlayAgain());
+           
+            Console.WriteLine("Thank you for playing. Goodbye!");
+
         }
         
         static int CompareHands(String hand1, String hand2)
@@ -42,7 +69,10 @@ namespace ExceptionHandling
             {
                 return 1;
             }
-            else
+            else if (hand1 == "secretword")
+            {
+                return 1;
+            }
             {
                 return 2;
             }
@@ -70,23 +100,26 @@ namespace ExceptionHandling
             String hand = Console.ReadLine().Trim().ToLower();
             while(hand != "rock" && hand != "scissors" && hand != "paper")
             {
-                Console.WriteLine("That is not a valid entry. Please enter rock, paper, or scissors.");
-                hand = Console.ReadLine().Trim().ToLower();   
+                if(hand == "secretword")
+                {
+                    break;
+                }
+                throw new Exception();   
             }
             return hand;
         }
 
-        public static void GameLoop()
+        public static bool PlayAgain()
         {
             Console.WriteLine("Do you want to play again? [y/n]");
             string answer = Console.ReadLine();
             if ((answer == "y") || (answer =="Y") || (answer =="Yes") || (answer =="YES") || (answer =="yes"))
             {
-                Main();
+                return true;
             } 
             else
             {
-                 Console.WriteLine("Thank you for playing. Goodbye!");
+                return false;
             }
         }         
     }
