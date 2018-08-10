@@ -61,9 +61,7 @@ namespace Rainforest
 
             DTX0.item.Add(pineapple);
             DTX1.item.Add(pineapple);
-            DTX2.item.Add(pineapple);
-
-            
+            DTX2.item.Add(pineapple); 
 
         }
     }
