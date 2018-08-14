@@ -68,7 +68,6 @@ namespace Rainforest
 
     class Company 
     {
-        //fields
         public string name {get; set;}
         public List<Warehouse> warehouse = new List<Warehouse>();
 
