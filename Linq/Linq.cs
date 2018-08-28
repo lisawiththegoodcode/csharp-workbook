@@ -18,13 +18,14 @@ namespace Linq
             var negativeStudents =
                 from student in students
                 where student.Balance < 0
+                orderby student.Balance ascending
                 select student;
 
             Console.WriteLine("The following students have a negative tuition balance: ");
 
             foreach (Student student in negativeStudents)
             {
-                Console.WriteLine(student.Name);
+                Console.WriteLine(student.Name + ": " + student.Balance);
             }
         } 
 
