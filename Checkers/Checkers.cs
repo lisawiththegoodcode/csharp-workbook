@@ -19,21 +19,38 @@ namespace Checkers
 
     public enum Color { black, white };
 
+    public struct Coordinates
+    {
+        public int x;
+        public int y;
+
+        public Coordinates(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
     public class Checker
     {
         public string Symbol  { get; private set; }
+        public Coordinates coords {get; set;}
+        public Color color {get; set;}
 
         
-        public Checker(Color color)
+        public Checker(Color color, Coordinates coords)
         {
+            this.coords = coords;
+            this.color = color;
+
             if (color == Color.black)
             {  
-                Symbol = "•"; 
+                Symbol = "◦"; 
 
             }
-            else if (color == Color. white)
+            else if (color == Color.white)
             {
-                Symbol = "◦";
+                Symbol = "•";
             }
         }
     }
@@ -47,13 +64,40 @@ namespace Checkers
         public Board()
         {
             Checkers = new List<Checker>();
-            
-            for(int i=0; i<12; i++)
+                
+            for (int y=0; y<8; y++)
             {
-                Checkers.Add(new Checker(Color.black));
-                Checkers.Add(new Checker(Color.white));
+                for(int x=0; x<8; x+=2)
+                {
+                    if (y%2 == 0 && x==0)
+                    {
+                        x=1;
+                    }
+
+                    Coordinates coords = new Coordinates(x, y);
+   
+                    if (y<3)
+                    {
+                        Checkers.Add(new Checker(Color.white, coords));
+                    }
+                    else if (y == 3 || y == 4)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                       Checkers.Add(new Checker(Color.black, coords));
+                    }
+                }
             }
-            Console.WriteLine(Checkers.Count + "checkers have been instantiated");
+
+            Console.WriteLine(Checkers.Count + "checker pieces have been instantiated");
+
+            foreach (Checker check in Checkers)
+            {
+                System.Console.WriteLine(check.color);
+                System.Console.WriteLine(check.coords.x + ", " + check.coords.y);
+            }
 
             Grid = new string[][] 
             {
@@ -110,6 +154,7 @@ namespace Checkers
         //     return Checkers.All(x => x.Color == "white") || !Checkers.Exists(x => x.Color == "white");
         // }
     }
+
 
     class Game
     {
