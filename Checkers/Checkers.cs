@@ -111,7 +111,6 @@ namespace Checkers
                     }
                 }
             }
-
             // Console.WriteLine(Checkers.Count + "checker pieces have been instantiated");
             PlaceCheckers();
         }
@@ -144,17 +143,23 @@ namespace Checkers
             Console.WriteLine("7 " + String.Join("|", Grid[7]));
         }
         
+        //takes in a row and a column coordinate, searches the Checkers list for a match, and returns the Checker if there is a match. Otherwise returns null.
         public Checker SelectChecker(int row, int column)
         {
             return Checkers.Find(x => (x.coords.x == column && x.coords.y == row));
         }
 
-        //takes in the checker to move, and the row and column the user would like to move it to. if the move is not valid, it throws an exception, if it is valid moves the checker 
-        public void MoveChecker (Checker check, int newRow, int newColumn)
+        //takes in which player's turn it is, the checker to move, and the row and column the user would like to move it to. if the move is invalid, it throws an exception, if it is valid, it moves the checker 
+        public void MoveChecker (string playerTurn, Checker check, int newRow, int newColumn)
         {
+            //first check for invalid moves, and throw an exception if the move is invalid
             if (check == null)
             {
-                throw new Exception("Attempted to move from a space that does not contain a checker");
+                throw new Exception("Attempting to move from a space that does not contain a checker");
+            }
+            else if ((playerTurn == "White" && check.color == Color.black) || (playerTurn == "Black" && check.color == Color.white))
+            {
+                throw new Exception ("Attempting to move a checker out of turn");
             }
             else if (newRow > 7 || newRow < 0 || newColumn > 7 || newRow < 0)
             {
@@ -164,30 +169,227 @@ namespace Checkers
             {
                 throw new Exception("Attempting to move to a space that is occupied");
             }
-            else if (check.coords.x == newColumn || check.coords.y == newRow)
+            else if ((check.coords.x == newColumn || check.coords.y == newRow) && (Math.Abs(check.coords.y - newRow) != 4)) //if the change in y is 4, then it may be a double jump attempt, in which a linear move is allowed
             {
                 throw new Exception("Attempting a linear move");
             }
-            else if (((Math.Abs(check.coords.x - newColumn) == 1) && (Math.Abs(check.coords.y - newRow) == 1)) || ((Math.Abs(check.coords.x - newColumn) == 2) && (Math.Abs(check.coords.y - newRow) == 2) && (SelectChecker(check.coords.y + 1, check.coords.x + 1) != null || SelectChecker(check.coords.y - 1, check.coords.x - 1) != null)))
+            else if ((check.color == Color.black && ((check.coords.y - newRow) < 0)) || (check.color == Color.white && ((check.coords.y - newRow) > 0)))
             {
-                Grid[check.coords.y][check.coords.x] = " ";
-                check.coords = new Coordinates (newColumn, newRow);
-                PlaceCheckers();
-                DrawBoard(); 
+                throw new Exception("Attempting to move backwards");
             }
+
+            //then check for valid moves
+            //a valid move: the basic move - the move is both one away in the x and y value (and we've already checked that the space is unoccupied)
+            else if ((Math.Abs(check.coords.x - newColumn) == 1) && (Math.Abs(check.coords.y - newRow) == 1))
+            {
+                Move(check, newRow, newColumn);
+            }
+            //a valid move: the jump - the move is both two away in the x and y value, and there is a checker of the opposite color in between the current position and the new position
+            else if ((Math.Abs(check.coords.x - newColumn) == 2) && (Math.Abs(check.coords.y - newRow) == 2))
+            {
+                Jump(check, newRow, newColumn);
+            }
+
+            //a valid move: the double jump - the move is 4 away on the y axis, and has two single jump opportunities within it. 
+            else if (Math.Abs(check.coords.y - newRow) == 4)
+            {
+                //row and column in middle of the two checkers to jump
+                int middleRow;
+                int middleColumn;
+                
+                //double jump scenario one - the change in x is 4 / the change in y is 4
+                if ((Math.Abs(check.coords.x - newColumn) == 4) && (Math.Abs(check.coords.y - newRow) == 4))
+                {
+                    //if change in x is positive
+                    if ((newColumn - check.coords.x) > 0)
+                    {
+                        //then add 2 to get to the x to get the middle column
+                        middleColumn = check.coords.x + 2;
+
+                        //if the change in y is positive
+                        if ((newRow - check.coords.y) > 0)
+                        {
+                            //then add 2 to the y to get the middle row
+                            middleRow = check.coords.y + 2;
+                        }
+                        else
+                        {
+                            //otherwise it's negative so subtract 2
+                            middleRow = check.coords.y - 2;
+                        }
+                    }
+                    else
+                    {
+                        //otherwise the change in x is negative, so subtract 2 from the starting x to get the middle column 
+                        middleColumn = check.coords.x - 2;
+                        
+                        //if the change in y is positive
+                        if ((newRow - check.coords.y) > 0)
+                        {
+                            //then add 2 to the y to get the middle row
+                            middleRow = check.coords.y + 2;
+                        }
+                        else
+                        {
+                            //otherwise it's negative so subtract 2
+                            middleRow = check.coords.y - 2;
+                        }
+                    }
+                    DoubleJump(check, newRow, newColumn, middleRow, middleColumn);
+                }
+                
+                //double jump scenario 2 the change in x is 0 / the change in y is 4
+                else if ((check.coords.x == newColumn) && (Math.Abs(check.coords.y - newRow) == 4))
+                {
+                    //if theres a checker to in the positive x and y direction and the color is opposite the current checker, then add 2 to the x and the y to get the middle position
+                    if ((check.color == Color.white) && ((SelectChecker((check.coords.y + 1), (check.coords.x + 1)).color == Color.black)))
+                    {
+                        middleRow = check.coords.y + 2;
+                        middleColumn = check.coords.x + 2;
+                        DoubleJump(check, newRow, newColumn, middleRow, middleColumn);
+                    }
+                    //if theres a checker to in the negative x and positive y direction and the color is opposite the current checker, then add 2 to the y and subtract 2 from the x to get the middle position
+                    else if ((check.color == Color.white) && ((SelectChecker((check.coords.y + 1), (check.coords.x - 1)).color == Color.black)))
+                    {
+                        middleRow = check.coords.y + 2;
+                        middleColumn = check.coords.x - 2;
+                        DoubleJump(check, newRow, newColumn, middleRow, middleColumn);
+                    }                    
+                    //if theres a checker to in the positive x and negative y direction and the color is opposite the current checker, then add 2 to the x and subtract 2 from the y to get the middle position
+                    else if ((check.color == Color.black) && ((SelectChecker((check.coords.y - 1), (check.coords.x + 1)).color == Color.white)))
+                    {
+                        middleRow = check.coords.y - 2;
+                        middleColumn = check.coords.x + 2;
+                        DoubleJump(check, newRow, newColumn, middleRow, middleColumn);
+                    } 
+                    //if theres a checker to in the negative x and y direction and the color is opposite the current checker, then subtract 2 from the x and the y to get the middle position
+                    else if ((check.color == Color.black) && ((SelectChecker((check.coords.y - 1), (check.coords.x - 1)).color == Color.white)))
+                    {
+                        middleRow = check.coords.y - 2;
+                        middleColumn = check.coords.x - 2;
+                        DoubleJump(check, newRow, newColumn, middleRow, middleColumn);
+                    }
+                    else
+                    {
+                        throw new Exception("not a valid double jump - no checker to jump in the first diagonal, forwards position");
+                    }
+                    //note y will always have a positive change when white is moving and a negative change when black is moving
+                }
+                else
+                {
+                    throw new Exception("not a valid double jump - ending position invalid");
+                }
+                //note: there will never be a double jump scenario in which the change in y is less than 4, unless backwards movements are allowed (it's possible that this occurs when you play with kings?)
+            }
+
             else
             {
-                throw new Exception("attempting something else");
+                throw new Exception("attempting something that has not been defined as valid");
             }
         }
 
-        
-        public void RemoveChecker(int row, int column)
+        //double jump function: takes in starting checker, ending row, ending column, and middle row, middle column, and performs two jumps
+        public void DoubleJump(Checker check, int newRow, int newColumn, int middleRow, int middleColumn)
         {
-            // Your code here
-            return;
+            //declares a "middle space" checker which should be null if the double jump is valid
+            Checker middleSpace;
+            middleSpace = SelectChecker(middleRow, middleColumn);
+                    
+            if (middleSpace == null)
+                {
+                    //perform first jump
+                    Jump(check, middleRow, middleColumn);
+
+                    //select the checker to perform the second jump with
+                    Checker middleCheck;
+                    middleCheck = SelectChecker(middleRow, middleColumn);
+
+                    //perform second jump
+                    Jump(middleCheck, newRow, newColumn);
+                }
+            else
+                {
+                    throw new Exception("not a valid double jump - middle space is not empty");
+                }
+        }
+        //move function, takes in the starting checker, ending row and ending column, moves it physically on the grid, and updates it's coordinates in the list
+        public void Move(Checker check, int newRow, int newColumn)
+        {
+            //updates the starting position on the grid to be empty
+            Grid[check.coords.y][check.coords.x] = " ";
+
+            //updates the starting checker's coordinates to the new row and new column
+            check.coords = new Coordinates (newColumn, newRow);
+            
+            //calls the place checkers and draw board to update the physical board
+            PlaceCheckers();
+            DrawBoard(); 
+        }
+        //jump function, takes in starting checker, ending row and ending column, and performs a "jump" which entails a move and remove of the jumped checker
+        public void Jump(Checker check, int newRow, int newColumn)
+        {
+            //declares the space and checker in between the starting position and ending position
+            int inBetweemColumn;
+            int inBetweenRow;
+            Checker inBetweenCheck;
+
+            //if the change in x is positive, the inbetween x will be starting x + 1
+            if ((newColumn - check.coords.x) > 0)
+            {
+                inBetweemColumn = check.coords.x + 1;
+                //if the change in y is positive, the inbetween y will be starting y + 1
+                if ((newRow - check.coords.y) > 0)
+                {
+                    inBetweenRow = check.coords.y + 1;
+                }
+                //otherwise change in y is negative and the in between y will be starting y -1
+                else
+                {
+                    inBetweenRow = check.coords.y - 1;
+                }
+            }
+
+            //otherwise change in x is negative, the inbetween x will be starting x - 1
+            else
+            {
+                inBetweemColumn = check.coords.x - 1;
+                //if the change in y is positive, the inbetween y will be starting y + 1
+                if ((newRow - check.coords.y) > 0)
+                {
+                    inBetweenRow = check.coords.y + 1;
+                }
+                //otherwise change in y is negative and the in between y will be starting y -1
+                else
+                {
+                    inBetweenRow = check.coords.y - 1;
+                }
+            }
+            //use the in between row and column to select the in between checker
+            inBetweenCheck = SelectChecker(inBetweenRow, inBetweemColumn);
+
+            //if there's a checker there and it's the opposite color of the starting checker, then remove it and move the starting checker to the ending coords
+            if (inBetweenCheck != null)
+            {
+                if (inBetweenCheck.color != check.color)
+                {
+                    RemoveChecker(inBetweenRow, inBetweemColumn);
+                    Move(check, newRow, newColumn);
+                }
+            }
+            else
+            {
+                throw new Exception ("that is not a valid jump");
+            }
         }
         
+        //removeChecker function, takes in a row and column, and removes the checker at this position from the list, and updates the physical grid to a blank space at that position
+        public void RemoveChecker(int row, int column)
+        {
+            Checkers.Remove(SelectChecker(row, column));
+            Grid[row][column] = " ";
+        }
+        
+        //check for win bool, returns true if the only checkers left are all of one color
         public bool CheckForWin()
         {
             return Checkers.All(x => x.color == Color.white) || !Checkers.Exists(x => x.color == Color.white);
@@ -202,9 +404,17 @@ namespace Checkers
             Board board = new Board(); 
             board.DrawBoard();
 
+            string playerTurn = "White";
+            bool swap = true;
+
             while(board.CheckForWin() == false)
             {
+                if (swap)
+                {
+                    playerTurn = (playerTurn == "White" ? "Black" : "White");   
+                }
 
+                Console.WriteLine("Player Turn: " + playerTurn);
                 Console.WriteLine("Enter Pickup Row:");
                 int row = int.Parse(Console.ReadLine());
                 Console.WriteLine("Enter Pickup Column:");
@@ -216,14 +426,17 @@ namespace Checkers
 
                 try
                 {
-                    board.MoveChecker(board.SelectChecker(row, column), newRow, newColumn);
-
+                    swap = true;
+                    board.MoveChecker(playerTurn, board.SelectChecker(row, column), newRow, newColumn);
                 } 
                 catch (Exception)
                 {
                     Console.WriteLine(@"That's not a valid move. Please try again");
+                    swap = false;
                 }
             }
+        //this will only trigger once check for win returns true and the game progresses out of the while loop
+        Console.WriteLine($"Game over, {playerTurn} wins!");
         }
     }
 }
