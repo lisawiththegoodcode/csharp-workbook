@@ -8,19 +8,50 @@ namespace Checkers
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            // Checker black = new Checker(Color.black);
+            // Checker white = new Checker(Color.white);
+            // Console.WriteLine("Black Checker: " + black.Symbol);
+            // Console.WriteLine("White Checker: " + white.Symbol);
+            Game g1 = new Game();
+
+        }
+    }
+
+    public enum Color { black, white };
+
+    public struct Coordinates
+    {
+        public int x;
+        public int y;
+
+        public Coordinates(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
         }
     }
 
     public class Checker
     {
-        public string Symbol  { get; set; }
-        public int[] Position  { get; set; }
-        public string Color { get; set; }
+        public string Symbol  { get; private set; }
+        public Coordinates coords {get; set;}
+        public Color color {get; set;}
+
         
-        public Checker(string color, int[] position)
+        public Checker(Color color, Coordinates coords)
         {
-            // Your code here
+            this.coords = coords;
+            this.color = color;
+
+            if (color == Color.black)
+            {  
+                Symbol = "◦"; 
+
+            }
+            else if (color == Color.white)
+            {
+                Symbol = "•";
+            }
         }
     }
 
@@ -29,22 +60,56 @@ namespace Checkers
         public string[][] Grid  { get; set; }
         public List<Checker> Checkers { get; set; }
         
+        //board constructor initializes checkers and new gameboard
         public Board()
         {
-            // Your code here
-            return;
-        }
-        
-        public void CreateBoard()
-        {
-            // Your code here
-            return;
-        }
-        
-        public void GenerateCheckers()
-        {
-            // Your code here
-            return;
+            Checkers = new List<Checker>();
+                
+            for (int y=0; y<8; y++)
+            {
+                for(int x=0; x<8; x+=2)
+                {
+                    if (y%2 == 0 && x==0)
+                    {
+                        x=1;
+                    }
+
+                    Coordinates coords = new Coordinates(x, y);
+   
+                    if (y<3)
+                    {
+                        Checkers.Add(new Checker(Color.white, coords));
+                    }
+                    else if (y == 3 || y == 4)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                       Checkers.Add(new Checker(Color.black, coords));
+                    }
+                }
+            }
+
+            Console.WriteLine(Checkers.Count + "checker pieces have been instantiated");
+
+            foreach (Checker check in Checkers)
+            {
+                System.Console.WriteLine(check.color);
+                System.Console.WriteLine(check.coords.x + ", " + check.coords.y);
+            }
+
+            Grid = new string[][] 
+            {
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},          
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "},
+                new string[] {" ", " ", " ", " ", " ", " ", " ", " "}
+            };
         }
         
         public void PlaceCheckers()
@@ -55,14 +120,28 @@ namespace Checkers
         
         public void DrawBoard()
         {
-            // Your code here
-            return;
+            Console.WriteLine("  0 1 2 3 4 5 6 7");
+            Console.WriteLine("0 " + String.Join("|", Grid[0]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("1 " + String.Join("|", Grid[1]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("2 " + String.Join("|", Grid[2]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("3 " + String.Join("|", Grid[3]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("4 " + String.Join("|", Grid[4]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("5 " + String.Join("|", Grid[5]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("6 " + String.Join("|", Grid[6]));
+            Console.WriteLine("  ---------------");
+            Console.WriteLine("7 " + String.Join("|", Grid[7]));
         }
         
-        public Checker SelectChecker(int row, int column)
-        {
-            return Checkers.Find(x => x.Position.SequenceEqual(new List<int> { row, column }));
-        }
+        // public Checker SelectChecker(int row, int column)
+        // {
+        //     return Checkers.Find(x => x.Position.SequenceEqual(new List<int> { row, column }));
+        // }
         
         public void RemoveChecker(int row, int column)
         {
@@ -70,17 +149,19 @@ namespace Checkers
             return;
         }
         
-        public bool CheckForWin()
-        {
-            return Checkers.All(x => x.Color == "white") || !Checkers.Exists(x => x.Color == "white");
-        }
+        // public bool CheckForWin()
+        // {
+        //     return Checkers.All(x => x.Color == "white") || !Checkers.Exists(x => x.Color == "white");
+        // }
     }
+
 
     class Game
     {
         public Game()
         {
-            // Your code here
+            Board b1 = new Board(); 
+            b1.DrawBoard();
         }
     }
 }
