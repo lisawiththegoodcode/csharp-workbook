@@ -12,7 +12,7 @@ namespace Checkpoint3
             //create the context
             Context todoContext = new Context();
             //keep this here while working on the program, this will allow a new db structure to start fresh each time we run a test
-            // todoContext.Database.EnsureDeleted();
+            todoContext.Database.EnsureDeleted();
             //create the table
             todoContext.Database.EnsureCreated();
 
