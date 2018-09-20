@@ -12,7 +12,7 @@ namespace Checkpoint3
             //create the context
             Context todoContext = new Context();
             //keep this here while working on the program, this will allow a new db structure to start fresh each time we run a test
-            todoContext.Database.EnsureDeleted();
+            // todoContext.Database.EnsureDeleted();
             //create the table
             todoContext.Database.EnsureCreated();
 
@@ -20,81 +20,72 @@ namespace Checkpoint3
             System.Console.WriteLine("-----------------------");
             System.Console.WriteLine("Welcome to My ToDo App!");
             System.Console.WriteLine("-----------------------");
-                        
-            //instantiating variables for user input loop 
+
+            //the initial state of the program is to list currently incomplete todos, this will list nothing first time the app runs
+            Utils.ListIncomplete(todoContext);
+
+            //then give a menu of commands
+            Utils.OptionsMenu();
+
             bool needsCommand = true; 
-            int input = 0;
-
-            while (needsCommand == true)
+            while (needsCommand)
             {
-                //the default state of the program will be listing all todos currently incomplete, this will list nothing first time the app runs
-                Utils.ListIncomplete(todoContext);
-                //give a menu of commands, take in an integer command
-                Utils.OptionsMenu();
-                //Parse the input into an int, throw an exception if can be parsed but isn't 1-7
-                try
-                {
-                    input = Int32.Parse(Console.ReadLine());
+                //read the user's input 
+                string input = Console.ReadLine(); 
 
-                    if (input == 1)
-                    {
-                        Utils.AddToDo(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 2)
-                    {
-                        Utils.UpdateToDo(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 3)
-                    {
-                        Utils.MarkComplete(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 4)
-                    {
-                        Utils.Delete(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 5)
-                    {
-                        Utils.ListComplete(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 6)
-                    {
-                        Utils.ListAll(todoContext);
-                        needsCommand = true;
-                    }
-                    else if (input == 7)
-                    {
-                        Utils.ListType(todoContext, 7);
-                        needsCommand = true;
-                    }
-                    else if (input == 8)
-                    {
-                        Utils.ListType(todoContext, 8);
-                        needsCommand = true;
-                    }
-                    else if (input == 9)
-                    {
-                        Utils.ListType(todoContext, 9);
-                        needsCommand = true;
-                    }
-                    else if (input == 10)
-                    {
-                        System.Console.WriteLine("Thank you for using My ToDo App. See you next time!");
-                        needsCommand = false;
-                    }
-                    else
-                    {
-                        throw new Exception("the int entered is not an int 1-7");
-                    }
-                }
-                catch (Exception)
+                //Parse the input into an int if possible
+                bool successfullyParsed = int.TryParse(input, out int parsedInput);
+
+                //send tp proper method depending on user input
+                if (parsedInput == 1)
                 {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    needsCommand = true;
+                    Utils.AddToDo(todoContext);
+                }
+                else if (parsedInput == 2)
+                {
+                        Utils.UpdateToDo(todoContext);
+                }
+                else if (parsedInput == 3)
+                {
+                    Utils.MarkComplete(todoContext);
+                }
+                else if (parsedInput == 4)
+                {
+                    Utils.Delete(todoContext);
+                }
+                else if (parsedInput == 5)
+                {
+                    Utils.ListComplete(todoContext);
+                }
+                else if (parsedInput == 6)
+                {
+                    Utils.ListAll(todoContext);
+                }
+                else if (parsedInput == 7)
+                {
+                    Utils.ListType(todoContext, 7);
+                }
+                else if (parsedInput == 8)
+                {
+                    Utils.ListType(todoContext, 8);
+                }
+                else if (parsedInput == 9)
+                {
+                    Utils.ListType(todoContext, 9);
+                }
+                else if (parsedInput == 10)
+                {
+                    System.Console.WriteLine("Thank you for using My ToDo App. See you next time!");
+                    needsCommand = false;
+                }
+                else if (input.ToLower() == "help")
+                {
+                    Utils.OptionsMenu();
+                }
+                else
+                {
+                    System.Console.WriteLine("Here's your current ToDo list!");
+                    Utils.ListIncomplete(todoContext);
                 }
             }            
         }
@@ -139,29 +130,57 @@ namespace Checkpoint3
             if (results.Count() == 0)
             {
                 System.Console.WriteLine("You currently have nothing ToDo.");
+                System.Console.WriteLine("");
             }
             //if there are incomplete todos, list them
             else
             {
+                System.Console.WriteLine("-----------------");
                 System.Console.WriteLine("My Current ToDos:");
-                List(todoContext, results);
+                System.Console.WriteLine("-----------------");
+
+                //call function to print the list based on the results produced above
+                WriteList(results);
+                System.Console.WriteLine("");
             }
+
+            //display ids need to be saved to the database so that the user can use them to identify the item the'd like to manipulate
+            todoContext.SaveChanges();
         }
         //method OptionsMenu simply prints the menu of options for user to select from
         public static void OptionsMenu()
         {
+            System.Console.WriteLine("-------");
+            System.Console.WriteLine("Actions");
+            System.Console.WriteLine("-------");
+            System.Console.WriteLine("Enter 1 to ADD a new ToDo");
+            System.Console.WriteLine("Enter 2 to UPDATE an existing ToDo");
+            System.Console.WriteLine("Enter 3 to MARK a ToDo COMPLETE");
+            System.Console.WriteLine("Enter 4 to DELETE an existing ToDo");
             System.Console.WriteLine("");
-            System.Console.WriteLine("Please select from the following menu:");
-            System.Console.WriteLine("Enter 1 to add a new ToDo");
-            System.Console.WriteLine("Enter 2 to update an existing ToDo");
-            System.Console.WriteLine("Enter 3 to mark a ToDo complete");
-            System.Console.WriteLine("Enter 4 to delete an existing ToDo");
-            System.Console.WriteLine("Enter 5 to view previously completed ToDos");
-            System.Console.WriteLine("Enter 6 to view all your ToDos, both incomplete and previously completed");
-            System.Console.WriteLine("Enter 7 to view personal ToDos only");
-            System.Console.WriteLine("Enter 8 to view work ToDos only");
-            System.Console.WriteLine("Enter 9 to view school ToDos only");
-            System.Console.WriteLine("Enter 10 to quit");
+            System.Console.WriteLine("----------");
+            System.Console.WriteLine("List Views");
+            System.Console.WriteLine("----------");
+            System.Console.WriteLine("Enter 5 to view COMPLETED ToDos ONLY");
+            System.Console.WriteLine("Enter 6 to view ALL ToDos on record");
+            System.Console.WriteLine("Enter 7 to view PERSONAL ToDos ONLY");
+            System.Console.WriteLine("Enter 8 to view WORK ToDos ONLY");
+            System.Console.WriteLine("Enter 9 to view SCHOOL ToDos ONLY");
+            System.Console.WriteLine("");
+            System.Console.WriteLine("-------------");
+            System.Console.WriteLine("Exit Strategy");
+            System.Console.WriteLine("-------------");            
+            System.Console.WriteLine("Enter 10 to QUIT ");
+            System.Console.WriteLine("");
+            System.Console.WriteLine("----");
+            System.Console.WriteLine("Help");
+            System.Console.WriteLine("----");            
+            System.Console.WriteLine(@"Enter 'help' to get HELP");
+            System.Console.WriteLine("");
+            System.Console.WriteLine("----------------");
+            System.Console.WriteLine("My Current ToDos");
+            System.Console.WriteLine("----------------");            
+            System.Console.WriteLine("Enter ANY OTHER KEY to view your currently incomplete ToDos!");
         }
         //FUNCTION 1: AddToDo takes in todo context and uses this context to add a new to do to the list
         public static void AddToDo(Context todoContext)
@@ -174,516 +193,374 @@ namespace Checkpoint3
             Item newItem = new Item(description);
             todoContext.todos.Add(newItem);
             
-            //begin loop to prompt user for a type for this todo
-            bool needsTypeResponse = true;
-            while (needsTypeResponse)
-            {
-                System.Console.WriteLine("Would you like to add this ToDo to a specific list? Enter 1 for yes or 2 for no.");
-                try
-                {
-                    int response = Int32.Parse(Console.ReadLine());
-                    if (response == 1)
-                    {
-                        SetType(newItem);
-                        needsTypeResponse = false;            
-                    }                 
-                    else if (response == 2)
-                    {
-                        needsTypeResponse = false;
-                    }            
-                    else
-                    {
-                        throw new Exception("Invalid Entry: 1 or 2 expected");
-                    }
-                }
-                catch
-                {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    needsTypeResponse = true;
-                }            
-            }
+            //Prompt user for a type for this todo + set type
+            System.Console.WriteLine("What type of ToDo is this?");
+            SetType(newItem);
 
-            //begin loop to prompt user for a deadline for this todo
-            bool needsDeadlineResponse = true;
-            while (needsDeadlineResponse)
-            {
-                System.Console.WriteLine("Would you like to add a deadline to this ToDo? Enter 1 for yes or 2 for no.");
+            //Prompt user for a deadline for this todo + set type
+            System.Console.WriteLine("When is the deadline for this ToDo?");
+            SetDeadline(newItem);
 
-                try
-                {
-                    int response = Int32.Parse(Console.ReadLine());
-                    if (response == 1)
-                    {    
-                        SetDeadline(newItem);
-                        needsDeadlineResponse = false;
-                    }
-                    else if (response == 2)
-                    {
-                        needsDeadlineResponse = false;
-                    }            
-                    else
-                    {
-                        throw new Exception("Invalid Entry: 1 or 2 expected");
-                    }
-                }
-                catch
-                {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    needsDeadlineResponse = true;
-                } 
-            }  
-            
             System.Console.WriteLine("Your ToDo has been added. Thank you!");
             System.Console.WriteLine("");
-            //save changes to store this new ToDo and any attributes that have been defined
+
+            //save changes to store this new ToDo and it's attributes
             todoContext.SaveChanges();
         }
         //method SetType takes in an item and updates it's type property
         public static void SetType(Item item)
         {
-            //give type options
-            System.Console.WriteLine("Please enter 1 for Personal, 2 for Work, or 3 for School. If you would prefer to keep this ToDo on your general ToDo list, please enter 4.");
-            
-            //take in input as an integer
-            //this function call must be inbedded in a try/catch statement in case a non-integer gets entered
-            int input = Int32.Parse(Console.ReadLine());
-            
-            //begin conditional statements to set the type according to the number entered
-            if (input == 1)
+            bool loop = true;
+            while (loop)
             {
-                item.type = Type.personal;
+                //give type options
+                System.Console.WriteLine("Please enter 1 for Personal, 2 for Work, 3 for School, or 4 for general.");
+                
+                //read the user's input 
+                string input = Console.ReadLine(); 
+
+                //Parse the input into an int if possible
+                bool successfullyParsed = int.TryParse(input, out int parsedInput);
+                //begin conditional statements to set the type according to the number entered
+                if (parsedInput == 1)
+                {
+                    item.type = Type.personal;
+                    loop = false;
+                }
+                else if (parsedInput == 2)
+                {
+                    item.type = Type.work;
+                    loop = false;
+                }
+                else if (parsedInput == 3)
+                {
+                    item.type = Type.school;
+                    loop = false;
+                }
+                else if (parsedInput == 4)
+                {
+                    item.type = Type.general;
+                    loop = false;
+                }
+                else 
+                {
+                    Console.WriteLine("Not a valid entry. Please try again.");
+                } 
             }
-            else if (input == 2)
-            {
-                item.type = Type.work;
-            }
-            else if (input == 3)
-            {
-                item.type = Type.school;
-            }
-            else
-            {
-                throw new Exception("Invalid Entry: 1, 2, 3 or 4 expected");
-            } 
         }
         //method SetDeadline takes in an item and sets it's deadline property
         public static void SetDeadline(Item item)
         {
             //prompt user for a deadline
-            System.Console.WriteLine("Please enter the deadline for this ToDo. Follow this Date/Time format: MM/DD/YYYY HH:MM:SS AM/PM:");
-            //take in input as a DateTime variable
-            //this function call must be embedded in a try/catch statement in case user input is not able to be parsed as a datetime
-            DateTime dt = DateTime.Parse(Console.ReadLine());
-            //set the item's deadline to this time
-            item.deadline = dt;
-        }
-        //FUNCTION 2: UpdateToDo takes in the todoContext and makes changes to a specified todo's description, type or deadline
-        public static void UpdateToDo(Context todoContext)
-        {
-            //prompt for displayID
-            System.Console.WriteLine("Please enter the number associated with the ToDo item you would like to update:");
-            
-            //declare variables
-            int id;
-            bool needsId = true;
+            System.Console.WriteLine("Please enter the deadline for this ToDo. Follow this Date/Time format: MM/DD/YYYY HH:MM:SS AM/PM.");
+            System.Console.WriteLine("Don't want to set a deadline? No problem. Press any key to continue with no deadline.");
 
-            //begin loop to confirm and update the ToDo
-            while (needsId == true)
+            //read the user's input 
+            string input = Console.ReadLine(); 
+
+            //Parse the input into a datetime if possible
+            bool successfullyParsed = DateTime.TryParse(input, out DateTime dt);
+            if (successfullyParsed)
             {
-                try
-                {
-                    //take in a number as input
-                    id = Int32.Parse(Console.ReadLine());
-                    //check if there's a match between this number and any item's displayID in the todo list
-                    var match = from t in todoContext.todos where t.displayID == id 
-                    select t;
-
-                    
-                    if (match.Count() == 1) //there is ONE number that matches an existing todo
-                    {
-                        foreach (Item item in match) // it didn't allow me to use t, so I followed the foreach format that has been working, even though there is only one item that is a match in this scenario
-                        {
-                            //confirm the ToDo they would like to update
-                            System.Console.WriteLine("The ToDo item you would like to update is: " + item.description);
-                            System.Console.WriteLine("Is that correct? Enter 1 for yes or 2 for no.");
-                            
-                            //take in a number as input
-                            int response = Int32.Parse(Console.ReadLine());
-                            bool needsUpdateResponse = true;
-
-                            //begin inner loop to identify which property of the ToDo the user would like to update
-                            if (response == 1)
-                            {
-                                while (needsUpdateResponse)
-                                {
-                                    System.Console.WriteLine("What would you like to change about this ToDo? Please enter 1 for Description, 2 for List, or 3 for Deadline.");
-
-                                    try
-                                    {
-                                        //takes in number as input
-                                        int input = Int32.Parse(Console.ReadLine());
-                                        if (input == 1)
-                                        {
-                                            //prompt for new description
-                                            System.Console.WriteLine("Please enter your new description:");
-                                            string newDescription = Console.ReadLine();
-                                            //update the description
-                                            item.description = newDescription;
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }
-                                        else if (input == 2)
-                                        {
-                                            //call SetType function
-                                            SetType(item);
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }
-                                        else if (input == 3)
-                                        {
-                                            //call SetDeadline function
-                                            SetDeadline(item);
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }            
-                                        else
-                                        {
-                                            throw new Exception("Invalid Entry: 1, 2, or 3 expected");
-                                        }
-                                    }
-                                    catch
-                                    {
-                                        System.Console.WriteLine("That is not a valid entry. Please try again.");
-                                        //if error, go back to beginning of the loop and prompt for the property of the item the user would like to update
-                                        needsUpdateResponse = true;
-                                    }    
-                                }                                        
-                                System.Console.WriteLine("Your ToDo has been updated. Thank you!");
-                                System.Console.WriteLine("");
-                                //exit outer loop
-                                needsId = false;
-                                //save changes made
-                                todoContext.SaveChanges();                                            
-                            }
-                            else if (response == 2)
-                            {
-                                //begin outer loop again prompting for item to update
-                                needsId = true;
-                                System.Console.WriteLine("Sorry about that! Let's try again. Please enter the number to the left of the ToDo item you'd like to update.");
-                        
-                            }
-                            else
-                            {
-                                throw new Exception("Invalid Entry: 1 or 2 expected");
-                            }
-                        }
-                    }
-                    //logging possible error options to help problem solve if bugs occur
-                    else if (match.Count() > 0)
-                    {
-                        System.Console.WriteLine($"This number is associated with multiple entries. Let's take a look at all the items associated with this number:");
-                        foreach (Item item in match) 
-                        {
-                            //confirm the ToDo they would like to update
-                            System.Console.WriteLine(item.description + " | " + item.status);
-                            System.Console.WriteLine("Is this the ToDo you'd like to update? Please enter 1 for yes or 2 for no");
-                            int input = Int32.Parse(Console.ReadLine());
-                            if (input == 1)
-                            {
-                                bool needsUpdateResponse = true;
-                                while (needsUpdateResponse)
-                                {
-                                    System.Console.WriteLine("What would you like to change about this ToDo? Please enter 1 for Description, 2 for List, or 3 for Deadline.");
-
-                                    try
-                                    {
-                                        //takes in number as input
-                                        int response = Int32.Parse(Console.ReadLine());
-                                        if (response == 1)
-                                        {
-                                            //prompt for new description
-                                            System.Console.WriteLine("Please enter your new description:");
-                                            string newDescription = Console.ReadLine();
-                                            //update the description
-                                            item.description = newDescription;
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }
-                                        else if (response == 2)
-                                        {
-                                            //call SetType function
-                                            SetType(item);
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }
-                                        else if (response == 3)
-                                        {
-                                            //call SetDeadline function
-                                            SetDeadline(item);
-                                            //exit inner loop
-                                            needsUpdateResponse = false;
-                                        }            
-                                        else
-                                        {
-                                            throw new Exception("Invalid Entry: 1, 2, or 3 expected");
-                                        }
-                                    }
-                                    catch
-                                    {
-                                        System.Console.WriteLine("That is not a valid entry. Please try again.");
-                                        //if error, go back to beginning of the loop and prompt for the property of the item the user would like to update
-                                        needsUpdateResponse = true;
-                                    }    
-                                }                                        
-                                System.Console.WriteLine("Your ToDo has been updated. Thank you!");
-                                System.Console.WriteLine("");
-                                //exit outer loop
-                                needsId = false;
-                                //save changes made
-                                todoContext.SaveChanges(); 
-                                break;
-                            }
-                            else if (input == 2)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                throw new Exception("Invalid entry at match.Count >0; 1 or 2 expected.");
-                            } 
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("the number entered does not match the ids of any todos currently stored in the database");
-                    }
-                }
-                catch (Exception)
-                {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    //begin outer loop again prompting for item to update
-                    needsId = true;
-                }              
+                //set the item's deadline to parsed DateTime input
+                item.deadline = dt;
             }
         }
+
+        //FUNCTION 2: UpdateToDo takes in the todoContext and makes changes to a specified todo's description, type or deadline
+        public static void UpdateToDo(Context todoContext)
+        { 
+            //begin loop to confirm and update the ToDo
+            bool loop = true;
+            while (loop)
+            {
+                //prompt for displayID
+                System.Console.WriteLine("Please enter the ID of the ToDo item you would like to update:");
+
+                //read the user's input 
+                string input = Console.ReadLine(); 
+
+                //Parse the input into an int if possible
+                bool successfullyParsed = int.TryParse(input, out int parsedInput);
+
+                var match = from t in todoContext.todos where t.displayID == parsedInput 
+                select t;
+
+                //if one unique match is returned, update this item
+                if (match.Count() == 1)
+                {
+                    foreach (Item item in match)
+                    {
+                        System.Console.WriteLine($"Thanks. Here's the current description of this ToDo: {item.description}");
+                        System.Console.WriteLine("Please enter your new description below OR enter 0 to keep this description.");
+                        string newDescription = Console.ReadLine();
+                        if (newDescription != "0")
+                        {
+                            item.description = newDescription;
+                        }
+                        System.Console.WriteLine("Thanks. Would you like to update the type? Enter any key to update OR enter 0 to keep the current type.");
+                        string newType = Console.ReadLine().ToLower();
+                        if (newType != "0")
+                        {
+                            SetType(item);
+                        }
+                        System.Console.WriteLine("Thanks. Would you like to update the deadline? Enter any key to update OR enter 0 to keep the current deadline.");
+                        string newDeadline = Console.ReadLine().ToLower();
+                        if (newDeadline != "0")
+                        {
+                            SetDeadline(item);
+                        }
+                        System.Console.WriteLine("Your ToDo has been updated. Thank you!");
+                        System.Console.WriteLine("");
+                        //exit loop
+                        loop = false;
+                    }
+                }
+
+                //If the user has run multiple lists recently, there can be multiple equivalent display ids. 
+                //In that case, guide the user to match Item by description
+                else if (match.Count() > 1)
+                {
+                    System.Console.WriteLine("There are multiple ToDos with that ID. Sorry about that! Please enter the description of the item you'd like to mark complete.");
+                    string descriptionMatch = Console.ReadLine().ToLower().Trim();
+                    //tracking if a match is found. In case it's not, I want to display some feedback to the user.
+                    bool matchFound = false;
+
+                    foreach (Item item in match)
+                    {
+                        //if match complete the task and move on
+                        if (descriptionMatch == item.description.ToLower().Trim())
+                        {
+                            System.Console.WriteLine("Great, let's update it. Please enter your new description below OR enter 0 to keep the current description.");
+                            string newDescription = Console.ReadLine();
+                            if (newDescription != "0")
+                            {
+                                item.description = newDescription;
+                            }
+                            System.Console.WriteLine("Thanks. Would you like to update the type? Enter any key to update OR enter 0 to keep the current type.");
+                            string newType = Console.ReadLine().ToLower();
+                            if (newType != "0")
+                            {
+                                SetType(item);
+                            }
+                            System.Console.WriteLine("Thanks. Would you like to update the deadline? Enter any key to update OR enter 0 to keep the current deadline.");
+                            string newDeadline = Console.ReadLine().ToLower();
+                            if (newDeadline != "0")
+                            {
+                                SetDeadline(item);
+                            }
+                            System.Console.WriteLine("Your ToDo has been updated. Thank you!");
+                            System.Console.WriteLine("");
+                            matchFound = true;
+                            loop = false;
+                            break;
+
+                        } 
+                        //if no match keep searching
+                        else
+                        {
+                            matchFound = false;
+                            continue;
+                        }
+                    }
+                    //let user no if no match was found based on the description they entered
+                    if (matchFound == false)
+                    {
+                        System.Console.WriteLine("Sorry, that description did not return a match. Please try again.");
+                    }
+                }                
+                else
+                {
+                    Console.WriteLine("That ID did not return a match. Please try again.");
+                }  
+
+                //save any changes made in this method to the database
+                todoContext.SaveChanges();
+            }
+        }
+
         //FUNCTION 3: MarkComplete take in todoContext and updates the status property to complete
         public static void MarkComplete(Context todoContext)
         {
-            System.Console.WriteLine("Please enter the number of the ToDo item you would like to mark complete:");
-            //declare variables
-            int id;
-            bool needsId = true;
-
-            //begin loop to mar the ToDo complet
-            while (needsId == true)
+            //begin loop to confirm and mark the ToDo complete
+            bool loop = true;
+            while (loop)
             {
-                try
+                //prompt for displayID
+                System.Console.WriteLine("Please enter the ID of the ToDo item you would like to mark complete:");
+
+                //read the user's input 
+                string input = Console.ReadLine(); 
+
+                //Parse the input into an int if possible
+                bool successfullyParsed = int.TryParse(input, out int parsedInput);
+
+                var match = from t in todoContext.todos where t.displayID == parsedInput 
+                select t;
+
+                //if one unique match is returned, mark this item complete
+                if (match.Count() == 1)
                 {
-                    //parse input to a number
-                    id = Int32.Parse(Console.ReadLine());
-                    
-                    //find the display id that matches the number the user inputted
-                    var match = from t in todoContext.todos where (t.displayID == id)
-                    select t;
-
-                    if (match.Count() == 1) //ONE number that matches an existing todo
+                    foreach (Item item in match)
                     {
-                        foreach (Item item in match)
+                        System.Console.WriteLine($"Thanks. Here's the current description of this ToDo: {item.description}");
+                        System.Console.WriteLine("Enter any key to continue marking this ToDo complete OR enter 0 to keep this ToDo incomplete.");
+                        string newStatus = Console.ReadLine();
+                        if (newStatus != "0")
                         {
-                            //confirm the item that returned a match for their input
-                            System.Console.WriteLine("The ToDo item you would like to mark complete is: " + item.description);
-                            System.Console.WriteLine("Is that correct? Enter 1 for yes or 2 for no.");
-                            //parse input to a number
-                            int response = Int32.Parse(Console.ReadLine());
-                            if (response == 1)
-                            {
-                                //update status, and update display id to 0 so that it does not retain the same id number as a future new ToDo
-                                item.status = Status.complete;
-                                item.displayID = 0;
+                            item.status = Status.complete;
+                            item.displayID = 0;
 
-                                System.Console.WriteLine("Your ToDo has been marked complete. Thank you!");
-                                System.Console.WriteLine("");
-                                //save
-                                todoContext.SaveChanges();
-                                //exit loop
-                                needsId = false;
-                            }
-                            else if (response == 2)
-                            {
-                                System.Console.WriteLine("Sorry about that! Please enter 'M' to go back to the options menu or any other key to try again."); 
-                                string input = Console.ReadLine().ToLower();
-                                if (input == "m")
-                                {
-                                    //exit loop
-                                    needsId = false;
-                                }
-                                else
-                                {
-                                    //go back to begining of loop and reprompt user to enter id
-                                    needsId = true;
-                                    System.Console.WriteLine("Please enter the number to the left of the ToDo item you'd like to mark complete.");
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception("Invalid Entry: 1 or 2 expected");
-                            }
+                            System.Console.WriteLine("Your ToDo has been marked complete. Thank you!");
+                            System.Console.WriteLine("");
+      
+                        }
+                        else if (newStatus == "0")
+                        {
+                            System.Console.WriteLine("Great, it will stay incomplete. Thank you!");
+                            System.Console.WriteLine("");
                         }
                     }
-                    else if (match.Count() > 0)
-                    {
-                        System.Console.WriteLine($"This number is associated with multiple entries. Let's take a look at all the items associated with this number:");
-                        foreach (Item item in match) 
-                        {
-                            //confirm the ToDo they would like to update
-                            System.Console.WriteLine(item.description + " | " + item.status);
-                            System.Console.WriteLine("Is this the ToDo you'd like to mark complete? Please enter 1 for yes or 2 for no");
-                            int response = Int32.Parse(Console.ReadLine());
-                            if (response == 1)
-                            {
-                                //update status, and update display id to 0 so that it does not retain the same id number as a future new ToDo
-                                item.status = Status.complete;
-                                item.displayID = 0;
+             
+                    loop = false;  
+                }
 
-                                System.Console.WriteLine("Your ToDo has been marked complete. Thank you!");
-                                System.Console.WriteLine("");
-                                //save
-                                todoContext.SaveChanges();
-                                //exit loop
-                                needsId = false;
-                                break;
-                            }
-                            else if (response == 2)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                throw new Exception("Invalid entry at match.Count >0; 1 or 2 expected.");
-                            } 
+                //If the user has run multiple lists recently, there can be multiple equivalent display ids. 
+                //In that case, guide the user to match Item by description
+                else if (match.Count() > 1)
+                {
+                    System.Console.WriteLine("There are multiple ToDos with that ID. Sorry about that! Please enter the description of the item you'd like to mark complete.");
+                    string descriptionMatch = Console.ReadLine().ToLower().Trim();
+                    //tracking if a match is found. In case it's not, I want to display some feedback to the user.
+                    bool matchFound = false;
+
+                    foreach (Item item in match)
+                    {
+                        //if match complete the task and move on
+                        if (descriptionMatch == item.description.ToLower().Trim())
+                        {
+                            item.status = Status.complete;
+                            item.displayID = 0;
+
+                            System.Console.WriteLine("Your ToDo has been marked complete. Thank you!");
+                            System.Console.WriteLine("");
+                            matchFound = true;
+                            loop = false;
+                            break;
+                        }
+                        //if no match keep searching
+                        else
+                        {
+                            matchFound = false;
+                            continue;
                         }
                     }
-                    else
+                    //let user no if no match was found based on the description they entered
+                    if (matchFound == false)
                     {
-                        throw new Exception("the number entered does not match the ids of any todos currently stored in the database");
+                        System.Console.WriteLine("Sorry, that description did not return a match. Please try again.");
                     }
                 }
-                catch (Exception)
+                else
                 {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    //go back to beginning of loop
-                    needsId = true;
-                }              
+                    Console.WriteLine("That ID did not return a match. Please try again.");
+                }    
+
+                //save any changes made in this method to the database
+                todoContext.SaveChanges();
             }
         }
+
         //FUNCTION 4: DELETE takes in the todoContext and removes a todo from the list
         public static void Delete(Context todoContext)
         {
-            System.Console.WriteLine("Please enter the number associated with the ToDo item you would like to delete:");
-            //declare variables
-            int id;
-            bool needsId = true;
-            //begin loop
-            while (needsId == true)
+            //begin loop to confirm and mark the ToDo complete
+            bool loop = true;
+            while (loop)
             {
-                try
+                //prompt for displayID
+                System.Console.WriteLine("Please enter the ID of the ToDo item you would like to delete:");
+
+                //read the user's input 
+                string input = Console.ReadLine(); 
+
+                //Parse the input into an int if possible
+                bool successfullyParsed = int.TryParse(input, out int parsedInput);
+
+                //find a display ID match to the input
+                var match = from t in todoContext.todos where t.displayID == parsedInput 
+                select t;
+
+                //if one match is found, delete it
+                if (match.Count() == 1)
                 {
-                    id = Int32.Parse(Console.ReadLine());
-
-                    var match = from t in todoContext.todos where (t.displayID == id)
-                    select t;
-
-                    if (match.Count() == 1) //ONE number that matches an existing todo
+                    foreach (Item item in match)
                     {
-                        foreach (Item item in match)
+                        System.Console.WriteLine($"Thanks. Here's the current description of this ToDo: {item.description}");
+                        System.Console.WriteLine("Enter any key to permanently delete this ToDo OR enter 0 to keep this ToDo in your database.");
+                        string remove = Console.ReadLine();
+                        if (remove != "0")
                         {
-                            //use description to confirm the item to delete
-                            System.Console.WriteLine("The ToDo item you would like to delete is: " + item.description);
-                            System.Console.WriteLine("Is that correct? Enter 1 for yes or 2 for no.");
+                            item.displayID = 0;
+                            todoContext.todos.Remove(item);
 
-                            try
-                            {
-                                int response = Int32.Parse(Console.ReadLine());
-                                if (response == 1)
-                                {
-                                    todoContext.todos.Remove(item);
-
-                                    System.Console.WriteLine("Your ToDo has been deleted. Thank you!");
-                                    System.Console.WriteLine("");
-
-                                    //save and exit lop
-                                    todoContext.SaveChanges();
-                                    needsId = false;
-                                }
-                                else if (response == 2)
-                                {
-                                    System.Console.WriteLine("Sorry about that! Please enter 'M' to go back to the options menu or any other key to try again."); 
-                                    string input = Console.ReadLine().ToLower();
-                                    if (input == "m")
-                                    {
-                                        //exit loop
-                                        needsId = false;
-                                    }
-                                    else
-                                    {
-                                        //go back to begining of loop and reprompt user to enter id
-                                        needsId = true;
-                                        System.Console.WriteLine("Please enter the number to the left of the ToDo item you'd like to mark complete.");
-                                    }
-                                }
-                                else
-                                {
-                                    throw new Exception("Invalid Entry: 1 or 2 expected");
-                                }
-                            }
-                            catch
-                            {
-                                System.Console.WriteLine("That is not a valid entry. Please try again.");
-                                needsId = false;
-                            }
+                            System.Console.WriteLine("Your ToDo has been deleted. Thank you!");
+                            System.Console.WriteLine("");
+                        }
+                        else if (remove == "0")
+                        {
+                            System.Console.WriteLine("Great, it will stay in the database. Thank you!");
+                            System.Console.WriteLine("");
                         }
                     }
-                    else if (match.Count() > 0)
+
+                    //exit loop
+                    loop = false;                
+                }
+
+                //If the user has run multiple lists recently, there can be multiple equivalent display ids. 
+                //In that case, guide the user to match Item by description
+                else if (match.Count() > 1)
+                {
+                    System.Console.WriteLine("There are multiple ToDos with that ID. Sorry about that! Please enter the description of the item you'd like to mark complete.");
+                    string descriptionMatch = Console.ReadLine().ToLower().Trim();
+                    //tracking if a match is found. In case it's not, I want to display some feedback to the user.
+                    bool matchFound = false;
+
+                    foreach (Item item in match)
                     {
-                        System.Console.WriteLine($"This number is associated with multiple entries. Let's take a look at all the items associated with this number:");
-                        foreach (Item item in match) 
+                        //if match complete the task and move on
+                        if (descriptionMatch == item.description.ToLower().Trim())
                         {
-                            //confirm the ToDo they would like to update
-                            System.Console.WriteLine(item.description + " | " + item.status);
-                            System.Console.WriteLine("Is this the ToDo you'd like to delete? Please enter 1 for yes or 2 for no");
-                            int response = Int32.Parse(Console.ReadLine());
-                            if (response == 1)
-                            {
-                                todoContext.todos.Remove(item);
+                            item.displayID = 0;
+                            todoContext.todos.Remove(item);
 
-                                System.Console.WriteLine("Your ToDo has been deleted. Thank you!");
-                                System.Console.WriteLine("");
-
-                                //save and exit lop
-                                todoContext.SaveChanges();
-                                needsId = false;        
-                                break;
-                            }
-                            else if (response == 2)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                throw new Exception("Invalid entry at match.Count >0; 1 or 2 expected.");
-                            } 
+                            System.Console.WriteLine("Your ToDo has been deleted. Thank you!");
+                            System.Console.WriteLine("");
+                            matchFound = true;
+                            loop = false;
+                            break;
+                        }
+                        //if no match keep searching
+                        else
+                        {
+                            matchFound = false;
+                            continue;
                         }
                     }
-                    else
+                    //let user no if no match was found based on the description they entered
+                    if (matchFound == false)
                     {
-                        throw new Exception("the number entered does not match the ids of any todos currently stored in the database");
+                        System.Console.WriteLine("Sorry, that description did not return a match. Please try again.");
                     }
                 }
-                catch (Exception)
+                else
                 {
-                    System.Console.WriteLine("That is not a valid entry. Please try again.");
-                    needsId = false;
-                }              
+                    Console.WriteLine("That ID did not return a match. Please try again.");
+                }
+
+                //save any changes made in this method to the database
+                todoContext.SaveChanges();
             }
         }
         //FUNCTION 5: ListComplete takes in a todocontext and prints the todo items with a complete status to the screen
@@ -693,8 +570,9 @@ namespace Checkpoint3
             var results = from t in todoContext.todos where (t.status == Status.complete)
             select t;
             System.Console.WriteLine("My Completed ToDos:");
-            List(todoContext, results);
+            WriteList(results);
             System.Console.WriteLine("");
+            todoContext.SaveChanges();
         }
         //FUNCTION 6: takes in a todo context and returns all todos sorted by status (with incomplete todos first)
         public static void ListAll(Context todoContext)
@@ -702,9 +580,16 @@ namespace Checkpoint3
             //get all todos and order by status
             var results = from t in todoContext.todos orderby t.status ascending
             select t;
-            System.Console.WriteLine("All ToDos - complete and incomplete:");
-            List(todoContext, results);
+            System.Console.WriteLine("----------");
+            System.Console.WriteLine("All ToDos:");
+            System.Console.WriteLine("----------");
+            
+            //call function that prints the items based on the above results returned
+            WriteList(results);
             System.Console.WriteLine("");
+
+            //display ids need to be saved so that the user can select by them
+            todoContext.SaveChanges();
         }
         //FUNCTION 7-9: take in a todoContext and an integer and list either Personal, Work, or school todos only
         public static void ListType(Context todoContext, int type)
@@ -712,34 +597,45 @@ namespace Checkpoint3
             //conditional to sort out which type we should list
             if (type == 7)
             {
-                var results = from t in todoContext.todos where t.type == Type.personal && t.status == Status.incomplete
+                var results = from t in todoContext.todos where t.type == Type.personal
                 select t;
-                System.Console.WriteLine("My Current Personal Todos:");
-                List(todoContext, results);
+                System.Console.WriteLine("------------------");
+                System.Console.WriteLine("My Personal Todos:");
+                System.Console.WriteLine("------------------");
+
+
+                //call function that prints the items based on the above results returned
+                WriteList(results);
             }
             else if (type == 8)
             {
-                var results = from t in todoContext.todos where t.type == Type.work && t.status == Status.incomplete
+                var results = from t in todoContext.todos where t.type == Type.work
                 select t;
-                System.Console.WriteLine("My Current Work Todos:");
-                List(todoContext, results);
+                System.Console.WriteLine("--------------");
+                System.Console.WriteLine("My Work Todos:");
+                System.Console.WriteLine("--------------");
+
+                //call function that prints the items based on the above results returned
+                WriteList(results);
             }
             else if (type == 9)
             {
-                var results = from t in todoContext.todos where t.type == Type.school && t.status == Status.incomplete
+                var results = from t in todoContext.todos where t.type == Type.school
                 select t;
-                System.Console.WriteLine("My Current School Todos:");
-                List(todoContext, results);
-            }
-            else
-            {
-                throw new Exception("issue occured in ListPersonal function");
-            }
+                System.Console.WriteLine("----------------");
+                System.Console.WriteLine("My School Todos:");
+                System.Console.WriteLine("----------------");
 
+                //call function that prints the items based on the above results returned
+                WriteList(results);
+            }
             System.Console.WriteLine("");
+
+            //display ids need to be saved so that the user can select by them
+            todoContext.SaveChanges();
         }
         //Since many functions were ending with the same process for printing a list, I created a function to avoid copy/paste for the process of printing the list
-        public static void List(Context todoContext, IQueryable<Item> results)
+        public static void WriteList(IQueryable<Item> results)
         {
             //Will display the following message if there are no todos in this results query
             if (results.Count() == 0)
@@ -751,6 +647,16 @@ namespace Checkpoint3
             {
                 //initialize counter
                 int i = 0;
+
+                //create and print heading
+                string head1 = "ID";
+                string head2 = "Description";
+                string head3 = "Type";
+                string head4 = "Deadline";
+                string head5 = "Status";
+                System.Console.WriteLine(head1.PadRight(3) + "| " + head2.PadRight(30) + "| " + head3.PadRight(25) + "| " + head4.PadRight(25) + "| " + head5.PadRight(15));
+                System.Console.WriteLine("-".PadRight(102, '-'));
+
                 foreach(Item item in results)
                 {
                     i++;
@@ -758,18 +664,39 @@ namespace Checkpoint3
                     //use counter to set display id
                     if (item.deadline == DateTime.MinValue)
                     {
-                        System.Console.WriteLine(item.displayID + " | " + item.description + " | " + item.type + " | no deadline | " + item.status);
+                        string column1 = item.displayID.ToString();
+                        string column2 = item.description.ToString();
+                        //display only the first 29 characters of a string if the todo is longer than 30 characters
+                        if (column2.Length > 30)
+                        {
+                            column2 = column2.Substring(0,29);
+                        }
+                        string column3 = item.type.ToString();
+                        string column4 = "no deadline";
+                        string column5 = item.status.ToString();
+                        System.Console.WriteLine(column1.PadRight(3) + "| " + column2.PadRight(30) + "| " + column3.PadRight(25) + "| " + column4.PadRight(25) + "| " + column5.PadRight(15));
+
                     }
                     else
                     {
-                        System.Console.WriteLine(item.displayID + " | " + item.description + " | " + item.type + " | " + item.deadline + " | " + item.status);
+                        string column1 = item.displayID.ToString();
+                        string column2 = item.description.ToString();
+                        //display only the first 29 characters of a string if the todo is longer than 30 characters
+                        if (column2.Length > 30)
+                        {
+                            column2 = column2.Substring(0,29);
+                        }
+                        string column3 = item.type.ToString();
+                        string column4 = item.deadline.ToString();
+                        string column5 = item.status.ToString();
+                        System.Console.WriteLine(column1.PadRight(3) + "| " + column2.PadRight(30) + "| " + column3.PadRight(25) + "| " + column4.PadRight(25) + "| " + column5.PadRight(15));
+
                     }
-                    //save each time (not sure if this is necessary but did it this way to be safe)
-                    todoContext.SaveChanges();
                 }
             }
         }
     }
+        
     //context class which creates the set of todos and calls on the Entity Framework to help link to the database
     public class Context:DbContext
     {
